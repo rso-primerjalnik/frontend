@@ -3,9 +3,14 @@
     <b-col md="2" class="mt-5">
       <p class="fw-bold mb-1">Košarice</p>
       <b-list-group v-for="cart in shoppingCarts" :key="cart">
-        <b-list-group-item href="#" @click="goToCart(cart)">
-          {{ cart.name }}
-        </b-list-group-item>
+        <div class="d-flex">
+          <b-list-group-item href="#" @click="goToCart(cart)">
+            {{ cart.name }}
+          </b-list-group-item>
+          <vue-feather class="align-self-center ms-1" type="trash" style="cursor: pointer" :style="{ visibility: (cart.favourites? 'hidden' : '')}" size="16"
+                       @click="deleteCart(cart)"></vue-feather>
+        </div>
+
       </b-list-group>
 
       <b-button @click="addCartModal = true" size="sm" class="mt-2">Dodaj</b-button>
@@ -53,7 +58,8 @@
     <b-form-input v-model="newCartName" required></b-form-input>
   </b-modal>
 
-  <b-modal v-model="addProductModal" ref="addProductModal" title="Nov izdelek" @hidden="resetProductData()" @ok="addProduct()">
+  <b-modal v-model="addProductModal" ref="addProductModal" title="Nov izdelek" @hidden="resetProductData()"
+           @ok="addProduct()">
     <label>Naziv</label>
     <b-form-input v-model="newProduct.name" class="mb-1" required></b-form-input>
     <label>Opis</label>
@@ -144,6 +150,13 @@ export default {
     getShoppingCarts() {
       app.axios.get(`${SHOPPING_CART_URL}/shopping-cart`)
           .then(resp => {
+            this.shoppingCarts = [
+              {
+                favourites: true,
+                name: 'Priljubljeni',
+                products: []
+              }
+            ]
             this.shoppingCarts = this.shoppingCarts.concat(resp.data);
           })
           .catch(err => {
@@ -223,6 +236,16 @@ export default {
       app.axios.delete(`${PRODUCT_CATALOG_URL}/products/${product.id}`)
           .then(() => {
             this.getProducts()
+          })
+          .catch(err => {
+            console.error(err)
+          })
+    },
+
+    deleteCart(cart) {
+      app.axios.delete(`${SHOPPING_CART_URL}/shopping-cart/${cart.cartId}`)
+          .then(() => {
+            this.getShoppingCarts()
           })
           .catch(err => {
             console.error(err)
