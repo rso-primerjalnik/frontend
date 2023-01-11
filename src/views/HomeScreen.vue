@@ -35,6 +35,12 @@
                            @click="addToFavourites(data.item)"></vue-feather>
             </div>
           </template>
+          <template #cell(delete)="data">
+            <div class="d-flex justify-content-center align-items-center">
+              <vue-feather type="trash" class="ms-3" size="20" style="cursor: pointer"
+                           @click="deleteProduct(data.item)"></vue-feather>
+            </div>
+          </template>
         </b-table>
       </b-col>
     </b-col>
@@ -47,8 +53,14 @@
     <b-form-input v-model="newCartName" required></b-form-input>
   </b-modal>
 
-  <b-modal v-model="addProductModal" ref="addProductModal" title="Nov izdelek">
-    <b-form-input v-model="newCartName" required></b-form-input>
+  <b-modal v-model="addProductModal" ref="addProductModal" title="Nov izdelek" @hidden="resetProductData()" @ok="addProduct()">
+    <label>Naziv</label>
+    <b-form-input v-model="newProduct.name" class="mb-1" required></b-form-input>
+    <label>Opis</label>
+    <b-form-input v-model="newProduct.description" class="mb-1" required></b-form-input>
+    <label>Teža</label>
+    <b-form-input v-model="newProduct.weight" required></b-form-input>
+
   </b-modal>
 
   <b-modal v-model="addToCartModal" ref="addToCartModal" title="Dodaj v košarico"
@@ -101,6 +113,10 @@ export default {
         {
           key: 'actions',
           label: 'Akcije'
+        },
+        {
+          key: 'delete',
+          label: ''
         }
       ],
       addCartModal: false,
@@ -187,8 +203,42 @@ export default {
           })
     },
 
+    addProduct() {
+      if (!this.newProduct.name || !this.newProduct.weight || !this.newProduct.description)
+        return
+
+      this.newProduct.favourite = false
+
+      app.axios.post(`${PRODUCT_CATALOG_URL}/products`, this.newProduct)
+          .then(resp => {
+            this.products.push(resp.data)
+          })
+          .catch(err => {
+            console.error(err)
+          })
+
+    },
+
+    deleteProduct(product) {
+      app.axios.delete(`${PRODUCT_CATALOG_URL}/products/${product.id}`)
+          .then(() => {
+            this.getProducts()
+          })
+          .catch(err => {
+            console.error(err)
+          })
+    },
+
     goToCart(cart) {
       router.push({name: 'ShoppingCart', params: {id: cart.favourites ? 'favourites' : cart.cartId}})
+    },
+
+    resetProductData() {
+      this.newProduct = {
+        name: "",
+        weight: "",
+        description: ""
+      }
     }
   }
 }
