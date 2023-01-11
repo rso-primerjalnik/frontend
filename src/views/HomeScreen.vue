@@ -1,9 +1,6 @@
 <template>
-  <b-row class="header">
-
-  </b-row>
   <b-row class="body">
-    <b-col md="2">
+    <b-col md="2" class="mt-5">
       <p class="fw-bold mb-1">Košarice</p>
       <b-list-group v-for="cart in shoppingCarts" :key="cart">
         <b-list-group-item href="#" @click="goToCart(cart)">
@@ -14,23 +11,43 @@
       <b-button @click="addCartModal = true" size="sm" class="mt-2">Dodaj</b-button>
     </b-col>
     <b-col>
-      <h4 class="text-start ms-3 mb-2">Seznam izdelkov</h4>
-      <b-table :items="products" :fields="productsFields">
-        <template #cell(actions)="data">
-          <div class="d-flex justify-content-center align-items-center">
-            <b-button size="sm" class="me-1" @click="addToCartModal = true; productToAdd = data.item">Dodaj v košarico
-            </b-button>
-            <vue-feather type="star" size="20" :fill="data.item.favourite? 'yellow' : 'None'" style="cursor: pointer"
-                         @click="addToFavourites(data.item)"></vue-feather>
-          </div>
-        </template>
-      </b-table>
+      <b-navbar toggleable="lg" class="mb-3">
+        <b-navbar-brand href="/">Domača stran</b-navbar-brand>
+        <b-collapse id="nav-collapse" is-nav>
+
+          <b-navbar-nav>
+            <b-nav-item href="/stores">Trgovine</b-nav-item>
+          </b-navbar-nav>
+        </b-collapse>
+
+      </b-navbar>
+      <b-col>
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="text-start ms-3 mb-0">Seznam izdelkov</h4>
+          <b-button class="ms-auto me-3" @click="addProductModal = true">Dodaj izdelek</b-button>
+        </div>
+        <b-table :items="products" :fields="productsFields">
+          <template #cell(actions)="data">
+            <div class="d-flex justify-content-center align-items-center">
+              <b-button size="sm" class="me-1" @click="addToCartModal = true; productToAdd = data.item">Dodaj v košarico
+              </b-button>
+              <vue-feather type="star" size="20" :fill="data.item.favourite? 'yellow' : 'None'" style="cursor: pointer"
+                           @click="addToFavourites(data.item)"></vue-feather>
+            </div>
+          </template>
+        </b-table>
+      </b-col>
     </b-col>
+
   </b-row>
   <b-row class="footer"></b-row>
 
   <b-modal v-model="addCartModal" ref="addCartModal" title="Ime nove košarice" @hidden="newCartName = ''"
            @ok="newCartName.length && addShoppingCart()">
+    <b-form-input v-model="newCartName" required></b-form-input>
+  </b-modal>
+
+  <b-modal v-model="addProductModal" ref="addProductModal" title="Nov izdelek">
     <b-form-input v-model="newCartName" required></b-form-input>
   </b-modal>
 
@@ -91,7 +108,13 @@ export default {
       cartId: null,
       quantity: 1,
       productToAdd: null,
-      newCartName: ""
+      newCartName: "",
+      addProductModal: false,
+      newProduct: {
+        name: "",
+        weight: "",
+        description: ""
+      }
 
     }
   },
