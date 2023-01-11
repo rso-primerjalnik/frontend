@@ -35,6 +35,8 @@ export default {
 
   mounted() {
     console.log(this.$router.currentRoute.value.params.id)
+    if (this.cartId === 'favourites')
+      this.productsFields = this.productsFields.filter(item => item.key !== 'quantity')
     this.getProducts();
   },
 
