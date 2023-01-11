@@ -42,6 +42,8 @@
           </template>
           <template #cell(delete)="data">
             <div class="d-flex justify-content-center align-items-center">
+              <vue-feather type="edit-2" class="ms-3" size="20" style="cursor: pointer"
+                           @click="setProductData(data.item)"></vue-feather>
               <vue-feather type="trash" class="ms-3" size="20" style="cursor: pointer"
                            @click="deleteProduct(data.item)"></vue-feather>
             </div>
@@ -60,6 +62,16 @@
 
   <b-modal v-model="addProductModal" ref="addProductModal" title="Nov izdelek" @hidden="resetProductData()"
            @ok="addProduct()">
+    <label>Naziv</label>
+    <b-form-input v-model="newProduct.name" class="mb-1" required></b-form-input>
+    <label>Opis</label>
+    <b-form-input v-model="newProduct.description" class="mb-1" required></b-form-input>
+    <label>Teža</label>
+    <b-form-input v-model="newProduct.weight" required></b-form-input>
+  </b-modal>
+
+  <b-modal v-model="editProductModal" ref="editProductModal" title="Uredi izdelek" @hidden="resetProductData()"
+           @ok="editProduct()">
     <label>Naziv</label>
     <b-form-input v-model="newProduct.name" class="mb-1" required></b-form-input>
     <label>Opis</label>
@@ -136,8 +148,8 @@ export default {
         name: "",
         weight: "",
         description: ""
-      }
-
+      },
+      editProductModal: false
     }
   },
 
@@ -232,6 +244,20 @@ export default {
 
     },
 
+    editProduct() {
+      if (!this.newProduct.name || !this.newProduct.weight || !this.newProduct.description)
+        return
+
+      console.log(this.newProduct)
+      app.axios.put(`${PRODUCT_CATALOG_URL}/products/${this.newProduct.id}`, this.newProduct)
+          .then(() => {
+            this.getProducts()
+          })
+          .catch(err => {
+            console.error(err)
+          })
+    },
+
     deleteProduct(product) {
       app.axios.delete(`${PRODUCT_CATALOG_URL}/products/${product.id}`)
           .then(() => {
@@ -254,6 +280,17 @@ export default {
 
     goToCart(cart) {
       router.push({name: 'ShoppingCart', params: {id: cart.favourites ? 'favourites' : cart.cartId}})
+    },
+
+    setProductData(product) {
+      this.newProduct = {
+        id: product.id,
+        name: product.name,
+        weight: product.weight,
+        description: product.description,
+        favourite: product.favourite
+      }
+      this.editProductModal = true
     },
 
     resetProductData() {
